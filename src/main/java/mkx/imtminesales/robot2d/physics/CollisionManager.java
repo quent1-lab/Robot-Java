@@ -12,10 +12,10 @@ public class CollisionManager {
     public static boolean collisionAvecObstacle(Robot robot, List<Obstacle> obstacles) {
         for (Obstacle obstacle : obstacles) {
             if (collisionRectangles(
-                    robot.getPosition().getX() - robot.getTaille() / 2,
-                    robot.getPosition().getY() - robot.getTaille() / 2,
-                    robot.getTaille(),
-                    robot.getTaille(),
+                    robot.getPosition().getX() - robot.getLargeur() / 2,
+                    robot.getPosition().getY() - robot.getHauteur() / 2,
+                    robot.getLargeur(),
+                    robot.getHauteur(),
                     obstacle.getX(),
                     obstacle.getY(),
                     obstacle.getLargeur(),
@@ -29,10 +29,10 @@ public class CollisionManager {
     public static boolean collisionBalleAvecObstacle(Balle balle, List<Obstacle> obstacles) {
         for (Obstacle obstacle : obstacles) {
             if (collisionRectangles(
-                    balle.getPosition().getX() - balle.getTaille() / 2,
-                    balle.getPosition().getY() - balle.getTaille() / 2,
-                    balle.getTaille(),
-                    balle.getTaille(),
+                    balle.getPosition().getX() - balle.getLargeur() / 2,
+                    balle.getPosition().getY() - balle.getLargeur() / 2,
+                    balle.getLargeur(),
+                    balle.getLargeur(),
                     obstacle.getX(),
                     obstacle.getY(),
                     obstacle.getLargeur(),
@@ -47,10 +47,10 @@ public class CollisionManager {
         return collisionCercles(
                 balle.getPosition().getX(),
                 balle.getPosition().getY(),
-                balle.getTaille() / 2,
+                balle.getLargeur() / 2,
                 robot.getPosition().getX(),
                 robot.getPosition().getY(),
-                robot.getTaille() / 2);
+                robot.getLargeur() / 2);
     }
 
     public static boolean collisionBalleAvecBalles(List<Balle> balles) {
@@ -59,10 +59,10 @@ public class CollisionManager {
                 if (collisionCercles(
                         balles.get(i).getPosition().getX(),
                         balles.get(i).getPosition().getY(),
-                        balles.get(i).getTaille() / 2,
+                        balles.get(i).getLargeur()/ 2,
                         balles.get(j).getPosition().getX(),
                         balles.get(j).getPosition().getY(),
-                        balles.get(j).getTaille() / 2)) {
+                        balles.get(j).getLargeur() / 2)) {
                     return true;
                 }
             }
@@ -106,10 +106,10 @@ public class CollisionManager {
 
     public static boolean collisionBalleAvecPanier(Balle balle, Panier panier) {
         // Vérifier si 50% de la balle est dans le panier
-        return balle.getPosition().getX() - balle.getTaille() / 2 >= panier.getPosition().getX() &&
-               balle.getPosition().getX() + balle.getTaille() / 2 <= panier.getPosition().getX() + panier.getLargeur() &&
-               balle.getPosition().getY() - balle.getTaille() / 2 >= panier.getPosition().getY() &&
-               balle.getPosition().getY() + balle.getTaille() / 2 <= panier.getPosition().getY() + panier.getHauteur();
+        return balle.getPosition().getX() - balle.getLargeur() / 2 >= panier.getPosition().getX() &&
+               balle.getPosition().getX() + balle.getLargeur() / 2 <= panier.getPosition().getX() + panier.getLargeur() &&
+               balle.getPosition().getY() - balle.getLargeur() / 2 >= panier.getPosition().getY() &&
+               balle.getPosition().getY() + balle.getLargeur() / 2 <= panier.getPosition().getY() + panier.getHauteur();
     }
 
     private static boolean collisionRectangles(int x1, int y1, int largeur1, int hauteur1,

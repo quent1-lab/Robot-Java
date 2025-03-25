@@ -70,7 +70,7 @@ public class GestionnaireJeu {
     }
 
     public void gererDeplacementRobot(int dx, int dy) {
-        robot.deplacer(dx, dy);
+        robot.appliquerForce(dx, dy);
         collisionRobotObstacles();
     }
 
@@ -91,6 +91,13 @@ public class GestionnaireJeu {
     }
 
     public void mettreAJour() {
+        // Mettre à jour les déplcement du robot et des balles
+        robot.mettreAJourPosition();
+        for(Balle balle : balles){
+            balle.mettreAJourPosition();
+        }
+
+
         // Vérifier les collisions entre le robot et les obstacles
         if (CollisionManager.collisionAvecObstacle(robot, carte.getObstacles())) {
             // Déplacer le robot à sa position précédente
@@ -126,11 +133,11 @@ public class GestionnaireJeu {
         panier.dessinerPanier(gc);
 
         // Dessiner le robot
-        robot.dessinerRobot(gc);
+        robot.dessiner(gc);
 
         // Dessiner les balles
         for (Balle balle : balles) {
-            balle.dessinerBalle(gc);
+            balle.dessiner(gc);
         }
 
         // Afficher le score

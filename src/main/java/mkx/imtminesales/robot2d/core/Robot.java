@@ -8,46 +8,23 @@ import javafx.scene.paint.Color;
 import mkx.imtminesales.robot2d.physics.CollisionManager;
 
 /**
- * Classe permettant de gérer un robot.
- * 
- * @author Quent
+ * Classe permettant de gérer un robot. Hérite de la classe Entite pour
+ * bénéficier des fonctionnalités de base.
+ *
  */
-public class Robot {
+public class Robot extends Entite {
 
-    public Position2D position;
-    private List<Balle> balles;
-    private int capaciteMax;
-    private int capaciteActuelle;
-    private int score;
-
-    private int lastDX;
-    private int lastDY;
-
-    private static final double VITESSE = 3.0;
-    private static final int TAILLE_ROBOT = 40;
-    private static final Color COULEUR_ROBOT = Color.BLUE;
+    private List<Balle> balles; // Liste des balles transportées par le robot
+    private int capaciteMax; // Capacité maximale de transport
+    private int capaciteActuelle; // Nombre actuel de balles transportées
+    private int score; // Score du robot
 
     public Robot(int x, int y) {
-        this.position = new Position2D(x, y);
+        super(x, y, 40, 40, 10, Color.BLUE); // Taille 40x40, masse 10, couleur bleue
         this.balles = new ArrayList<>();
         this.capaciteMax = 3;
-    }
-
-    public Position2D getPosition() {
-        return position;
-    }
-
-    public void setPosition(Position2D position) {
-        this.position = position;
-    }
-
-    public void setXY(int x, int y) {
-        this.position.setX(x);
-        this.position.setY(y);
-    }
-
-    public int getTaille() {
-        return TAILLE_ROBOT;
+        this.capaciteActuelle = 0;
+        this.score = 0;
     }
 
     public List<Balle> getBalles() {
@@ -62,22 +39,12 @@ public class Robot {
         this.score++;
     }
 
-    public void deplacer(int dx, int dy) {
-        dx = (int) (dx * VITESSE);
-        dy = (int) (dy * VITESSE);
-        this.lastDX = dx;
-        this.lastDY = dy;
-        position.deplacer(dx, dy);
-    }
-
     public void deplacerBalles() {
-        for (Balle balle : this.balles) {
-            balle.deplacer(this.lastDX, this.lastDY);
+        // Déplacer les balles transportées par le robot
+        for (Balle balle : balles) {
+            balle.setVitesseX(this.getVitesseX());
+            balle.setVitesseY(this.getVitesseY());
         }
-    }
-
-    public double calculerDistance(Position2D autre) {
-        return position.calculerDistance(autre);
     }
 
     public boolean attraperBalle(List<Balle> balles) {
@@ -97,7 +64,18 @@ public class Robot {
 
     public Balle lacherBalle() {
         // Lâcher la première balle attrapée
-        for (Balle balle : this.balles) {
+        if (!this.balles.isEmpty()) {
+            Balle balle = this.balles.remove(0);
+            balle.relacher();
+            capaciteActuelle--;
+            return balle;
+        }
+        return null;
+    }
+
+    public Balle lacherBalle(Balle balle) {
+        // Lâcher une balle spécifique
+        if (!this.balles.isEmpty()) {
             balle.relacher();
             capaciteActuelle--;
             this.balles.remove(balle);
@@ -106,17 +84,9 @@ public class Robot {
         return null;
     }
 
-    public Balle lacherBalle(Balle balle) {
-        // Lâcher une balle spécifique
-        balle.relacher();
-        capaciteActuelle--;
-        this.balles.remove(balle);
-        return balle;
-    }
-
-    public void dessinerRobot(GraphicsContext gc) {
+    public void dessiner(GraphicsContext gc) {
         // Dessiner le robot sous forme de carré
-        gc.setFill(COULEUR_ROBOT);
-        gc.fillRect(position.getX() - TAILLE_ROBOT / 2, position.getY() - TAILLE_ROBOT / 2, TAILLE_ROBOT, TAILLE_ROBOT);
+        gc.setFill(couleur);
+        gc.fillRect(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
     }
 }

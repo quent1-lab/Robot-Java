@@ -1,5 +1,7 @@
 package mkx.imtminesales.robot2d.core;
 
+import  mkx.imtminesales.robot2d.physics.CollisionManager;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -34,6 +36,14 @@ public abstract class Entite {
 
     public void setPosition(Position2D position) {
         this.position = position;
+    }
+
+    public int getLargeur() {
+        return largeur;
+    }
+
+    public int getHauteur() {
+        return hauteur;
     }
 
     // Getter et setter pour la vitesse

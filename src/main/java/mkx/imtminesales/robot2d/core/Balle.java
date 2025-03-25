@@ -4,49 +4,17 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 /**
- * Classe permettant de gérer une balle.
+ * Classe permettant de gérer une balle. Hérite de la classe Entite pour
+ * bénéficier des fonctionnalités de base.
  *
- * @author Quent
  */
-public class Balle {
+public class Balle extends Entite {
 
-    public Position2D position;
-    private boolean estAttrapee;
-
-    private static final int TAILLE_BALLE = 20;
+    private boolean estAttrapee; // Indique si la balle est attrapée par le robot
 
     public Balle(int x, int y) {
-        this.position = new Position2D(x, y);
-    }
-
-    public Position2D getPosition() {
-        return position;
-    }
-
-    public void setPosition(Position2D position) {
-        this.position = position;
-    }
-
-    public int getTaille() {
-        return TAILLE_BALLE;
-    }
-
-    public void deplacer(int dx, int dy) {
-        position.deplacer(dx, dy);
-    }
-
-    public double calculerDistance(Position2D autre) {
-        return position.calculerDistance(autre);
-    }
-
-    public void dessinerBalle(GraphicsContext gc) {
-        // Dessiner la balle rouge si elle est attrapée sinon verte
-        if (estAttrapee) {
-            gc.setFill(Color.RED);
-        } else {
-            gc.setFill(Color.GREEN);
-        }
-        gc.fillOval(position.getX() - TAILLE_BALLE / 2, position.getY() - TAILLE_BALLE / 2, TAILLE_BALLE, TAILLE_BALLE);
+        super(x, y, 20, 20, 5, Color.GREEN); // Taille 20x20, masse 5, couleur verte par défaut
+        this.estAttrapee = false;
     }
 
     public boolean estAttrapee() {
@@ -55,10 +23,29 @@ public class Balle {
 
     public void attraper() {
         estAttrapee = true;
+        vitesseX = 0; // Réinitialiser la vitesse lorsqu'elle est attrapée
+        vitesseY = 0;
     }
 
     public void relacher() {
         estAttrapee = false;
     }
 
+    @Override
+    public void mettreAJourPosition() {
+        // Appliquer les règles de physique uniquement si la balle n'est pas attrapée
+        super.mettreAJourPosition();
+
+    }
+
+    @Override
+    public void dessiner(GraphicsContext gc) {
+        // Dessiner la balle rouge si elle est attrapée, sinon verte
+        if (estAttrapee) {
+            gc.setFill(Color.RED);
+        } else {
+            gc.setFill(couleur);
+        }
+        gc.fillOval(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
+    }
 }
