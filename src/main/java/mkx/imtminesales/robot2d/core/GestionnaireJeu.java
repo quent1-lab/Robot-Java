@@ -15,18 +15,20 @@ public class GestionnaireJeu {
     private final Panier panier;
     private final Carte carte;
 
-    private final int largeur;
-    private final int hauteur;
+    private final CollisionManager collisionMng;
+
+    public final int largeur;
+    public final int hauteur;
 
     public GestionnaireJeu(int largeurCarte, int hauteurCarte) {
         this.largeur = largeurCarte;
         this.hauteur = hauteurCarte;
 
         // Initialiser la carte
-        this.carte = new Carte(largeurCarte, hauteurCarte);
+        this.carte = new Carte(this);
 
         // Initialiser le robot au centre de la carte
-        this.robot = new Robot(largeurCarte / 2, hauteurCarte / 2);
+        this.robot = new Robot(this, largeurCarte / 2, hauteurCarte / 2);
 
         // Initialiser les balles à des positions aléatoires
         this.balles = new ArrayList<>();
@@ -35,13 +37,16 @@ public class GestionnaireJeu {
         // Initialiser le panier
         this.panier = new Panier(largeurCarte, hauteurCarte);
         this.panier.apparitionPanier(carte.getObstacles());
+
+        // Initialiser le gestionnaire de collisions
+        this.collisionMng = new CollisionManager(this);
     }
 
     private void apparitionBalle(int nombre) {
         // Ajouter une balle à une position aléatoire et vérifier les collisions avec les obstacles et les autres balles
         int nbEssais = 0;
         while (balles.size() < nombre) {
-            Balle balle = new Balle(
+            Balle balle = new Balle(this,
                     (int) (Math.random() * largeur),
                     (int) (Math.random() * hauteur)
             );
@@ -69,20 +74,18 @@ public class GestionnaireJeu {
         return carte;
     }
 
+    public Panier getPanier() {
+        return panier;
+    }
+
     public void gererDeplacementRobot(int dx, int dy) {
         robot.appliquerForce(dx, dy);
-        collisionRobotObstacles();
+        //collisionRobotObstacles();
     }
 
     public void actionBalle() {
         if (!robot.attraperBalle(balles)) {
             Balle balleLacher = robot.lacherBalle();
-            if (balleLacher != null) {
-                if(panier.verifierDepotBalle(balleLacher)) {
-                    supprimerBalle(balleLacher);
-                    robot.incrementerScore();
-                }
-            }
         }
     }
 
@@ -90,41 +93,17 @@ public class GestionnaireJeu {
         balles.remove(balle);
     }
 
-    public void mettreAJour() {
+    public void mettreAJour(double dt) {
         // Mettre à jour les déplcement du robot et des balles
-        robot.mettreAJourPosition();
-        for(Balle balle : balles){
-            balle.mettreAJourPosition();
-        }
+        robot.mettreAJourPosition(dt);
 
-
-        // Vérifier les collisions entre le robot et les obstacles
-        if (CollisionManager.collisionAvecObstacle(robot, carte.getObstacles())) {
-            // Déplacer le robot à sa position précédente
-            robot.position.retourEnArriere();
+        for (Balle balle : balles) {
+            balle.mettreAJourPosition(dt);
         }
+        
+        collisionMng.mettreAJourCollisions(dt);
     }
-
-    public void collisionRobotObstacles() {
-        // Vérifier les collisions entre le robot et ses balles et les obstacles
-        if (CollisionManager.collisionAvecObstacle(robot, carte.getObstacles())) {
-            // Déplacer le robot à sa position précédente
-            robot.position.retourEnArriere();
-        } else {
-            robot.deplacerBalles();
-            // Vérifier les collisions entre les balles et les obstacles
-            for (Balle balle : balles) {
-                if (CollisionManager.collisionBalleAvecObstacle(balle, carte.getObstacles())) {
-                    balle.position.retourEnArriere();
-                    // Vérifier si la balle est toujours dans le robot
-                    if (!CollisionManager.collisionBalleAvecRobot(balle, robot)) {
-                        robot.lacherBalle(balle);
-                    }
-                }
-            }
-        }
-    }
-
+    
     public void dessiner(GraphicsContext gc) {
         // Dessiner la carte
         carte.dessinerCarte(gc);

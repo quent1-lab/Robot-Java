@@ -50,11 +50,22 @@ public class App extends Application {
 
         // Utiliser AnimationTimer pour la boucle d'animation
         AnimationTimer animationTimer = new AnimationTimer() {
+            private long dernierTemps = 0; // Temps de la dernière itération en nanosecondes
+
             @Override
-            public void handle(long now) {
-                // Mettre à jour l'état du jeu
+            public void handle(long maintenant) {
+                if (dernierTemps == 0) {
+                    dernierTemps = maintenant; // Initialiser le temps précédent
+                    return;
+                }
+
+                // Calculer le delta time en secondes
+                double deltaTime = (maintenant - dernierTemps) / 1_000_000_000.0;
+                dernierTemps = maintenant;
+
+                // Mettre à jour l'état du jeu avec le delta time
                 gererDeplacement();
-                gestionnaireJeu.mettreAJour();
+                gestionnaireJeu.mettreAJour(deltaTime);
 
                 // Dessiner tous les éléments
                 GraphicsContext gc = toile.getGraphicsContext2D();

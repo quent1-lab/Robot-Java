@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 
 public abstract class Entite {
 
+    protected GestionnaireJeu gestionnaireJeu;
     protected Position2D position;
     protected double vitesseX; // Vitesse sur l'axe X
     protected double vitesseY; // Vitesse sur l'axe Y
@@ -15,7 +16,8 @@ public abstract class Entite {
     protected int hauteur; // Hauteur de l'entité
     protected Color couleur; // Couleur de l'entité
 
-    public Entite(int x, int y, int largeur, int hauteur, double masse, Color couleur) {
+    public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur) {
+        this.gestionnaireJeu = gestionnaireJeu;
         this.position = new Position2D(x, y);
         this.largeur = largeur;
         this.hauteur = hauteur;
@@ -44,23 +46,6 @@ public abstract class Entite {
         return hauteur;
     }
 
-    // Getter et setter pour la vitesse
-    public double getVitesseX() {
-        return vitesseX;
-    }
-
-    public void setVitesseX(double vitesseX) {
-        this.vitesseX = vitesseX;
-    }
-
-    public double getVitesseY() {
-        return vitesseY;
-    }
-
-    public void setVitesseY(double vitesseY) {
-        this.vitesseY = vitesseY;
-    }
-
     // Méthode pour appliquer une force à l'entité
     public void appliquerForce(double forceX, double forceY) {
         this.vitesseX += forceX / masse;
@@ -68,7 +53,7 @@ public abstract class Entite {
     }
 
     // Méthode pour mettre à jour la position en fonction de la vitesse
-    public void mettreAJourPosition() {
+    public void mettreAJourPosition(double dt) {
         // Mettre à jour la position en fonction de la vitesse
         position.deplacer(vitesseX, vitesseY);
 

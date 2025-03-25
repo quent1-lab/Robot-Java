@@ -19,14 +19,13 @@ public class Robot extends Entite {
     private int capaciteActuelle; // Nombre actuel de balles transportées
     private int score; // Score du robot
 
-    public Robot(int x, int y) {
-        super(x, y, 40, 40, 10, Color.BLUE); // Taille 40x40, masse 10, couleur bleue
+    public Robot(GestionnaireJeu gestionnaireJeu, int x, int y) {
+        super(gestionnaireJeu, x, y, 40, 40, 10, Color.BLUE); // Taille 40x40, masse 10, couleur bleue
         this.balles = new ArrayList<>();
         this.capaciteMax = 3;
         this.capaciteActuelle = 0;
         this.score = 0;
 
-        this.masse = 10;
         this.coefficientRebond = 0.8;
         this.frottement = 0.95;
     }
@@ -46,8 +45,8 @@ public class Robot extends Entite {
     public void deplacerBalles() {
         // Déplacer les balles transportées par le robot
         for (Balle balle : balles) {
-            balle.setVitesseX(this.getVitesseX());
-            balle.setVitesseY(this.getVitesseY());
+            balle.vitesseX = this.vitesseX;
+            balle.vitesseY = this.vitesseY;
         }
     }
 
@@ -58,7 +57,7 @@ public class Robot extends Entite {
                 if (this.capaciteActuelle < this.capaciteMax && !balle.estAttrapee()) {
                     this.capaciteActuelle++;
                     this.balles.add(balle);
-                    balle.attraper(this.getVitesseX(), this.getVitesseY());
+                    balle.attraper(this.vitesseX, this.vitesseY);
                     return true;
                 }
             }

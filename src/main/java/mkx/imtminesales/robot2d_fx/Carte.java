@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import mkx.imtminesales.robot2d.core.GestionnaireJeu;
 import mkx.imtminesales.robot2d.physics.CollisionManager;
 
 /**
@@ -16,20 +17,23 @@ import mkx.imtminesales.robot2d.physics.CollisionManager;
  */
 public class Carte {
 
-    private int LARGEUR;
-    private int HAUTEUR;
-    private List<Obstacle> obstacles; // Liste des obstacles
+    private GestionnaireJeu gestionnaire;
+    private final int LARGEUR;
+    private final int HAUTEUR;
+    private final List<Obstacle> obstacles; // Liste des obstacles
     private static final int TAILLE_OBSTACLE = 20; // Taille des obstacles (carrés)
 
-    public Carte(int LARGEUR, int HAUTEUR) {
-        this.LARGEUR = LARGEUR;
-        this.HAUTEUR = HAUTEUR;
+    public Carte(GestionnaireJeu gestionnaire) {
+        this.gestionnaire = gestionnaire;
+        this.LARGEUR = gestionnaire.largeur;
+        this.HAUTEUR = gestionnaire.hauteur;
+
         this.obstacles = new ArrayList<>();
         genererContour(); // Générer les obstacles du contour
         genererObstacles(); // Générer les obstacles au démarrage
     }
 
-    public void genererObstacles() {
+    private void genererObstacles() {
         Random random = new Random();
 
         // Ajouter des obstacles aléatoires
