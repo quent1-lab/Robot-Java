@@ -43,19 +43,10 @@ public class Position2D {
         return lastY;
     }
 
-    private boolean estEnCollision(int dx, int dy) {
-        // Vérifier si la position après déplacement est en dehors des limites
-        int hauteur = 600;
-        int largeur = 800;
-        return (x + dx < 0 || x + dx > largeur || y + dy < 0 || y + dy > hauteur);
-    }
-
     public void deplacer(int dx, int dy) {
         lastX = x;
         lastY = y;
-        if (estEnCollision(dx, dy)) {
-            return;
-        }
+
         x += dx;
         y += dy;
     }

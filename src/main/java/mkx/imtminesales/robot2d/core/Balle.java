@@ -15,6 +15,10 @@ public class Balle extends Entite {
     public Balle(int x, int y) {
         super(x, y, 20, 20, 5, Color.GREEN); // Taille 20x20, masse 5, couleur verte par défaut
         this.estAttrapee = false;
+
+        this.masse = 5;
+        this.coefficientRebond = 0.8;
+        this.frottement = 0.98;
     }
 
     public boolean estAttrapee() {
@@ -25,6 +29,12 @@ public class Balle extends Entite {
         estAttrapee = true;
         vitesseX = 0; // Réinitialiser la vitesse lorsqu'elle est attrapée
         vitesseY = 0;
+    }
+
+    public void attraper(double vitesseX, double vitesseY) {
+        estAttrapee = true;
+        this.vitesseX = vitesseX; // Appliquer la vitesse du robot
+        this.vitesseY = vitesseY;
     }
 
     public void relacher() {

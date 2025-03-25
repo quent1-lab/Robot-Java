@@ -25,6 +25,10 @@ public class Robot extends Entite {
         this.capaciteMax = 3;
         this.capaciteActuelle = 0;
         this.score = 0;
+
+        this.masse = 10;
+        this.coefficientRebond = 0.8;
+        this.frottement = 0.96;
     }
 
     public List<Balle> getBalles() {
@@ -54,7 +58,7 @@ public class Robot extends Entite {
                 if (this.capaciteActuelle < this.capaciteMax && !balle.estAttrapee()) {
                     this.capaciteActuelle++;
                     this.balles.add(balle);
-                    balle.attraper();
+                    balle.attraper(this.getVitesseX(), this.getVitesseY());
                     return true;
                 }
             }
@@ -88,5 +92,9 @@ public class Robot extends Entite {
         // Dessiner le robot sous forme de carré
         gc.setFill(couleur);
         gc.fillRect(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
+
+        // Ecrire la vitesse du robot au dessus de lui
+        gc.setFill(Color.BLACK);
+        gc.fillText("Vx: " + (int) vitesseX + " Vy: " + (int) vitesseY, position.getX() - largeur / 2, position.getY() - hauteur / 2);
     }
 }
