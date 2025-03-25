@@ -28,7 +28,7 @@ public class Robot extends Entite {
 
         this.masse = 10;
         this.coefficientRebond = 0.8;
-        this.frottement = 0.96;
+        this.frottement = 0.95;
     }
 
     public List<Balle> getBalles() {
@@ -95,6 +95,6 @@ public class Robot extends Entite {
 
         // Ecrire la vitesse du robot au dessus de lui
         gc.setFill(Color.BLACK);
-        gc.fillText("Vx: " + (int) vitesseX + " Vy: " + (int) vitesseY, position.getX() - largeur / 2, position.getY() - hauteur / 2);
+        gc.fillText(String.format("Vx: %.2f Vy: %.2f", vitesseX, vitesseY), position.getX() - largeur / 2, position.getY() - hauteur / 2);
     }
 }

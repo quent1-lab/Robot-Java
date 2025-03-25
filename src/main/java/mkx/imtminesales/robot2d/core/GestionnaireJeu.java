@@ -10,13 +10,13 @@ import mkx.imtminesales.robot2d_fx.Panier;
 
 public class GestionnaireJeu {
 
-    private Robot robot;
-    private List<Balle> balles;
-    private Panier panier;
-    private Carte carte;
+    private final Robot robot;
+    private final List<Balle> balles;
+    private final Panier panier;
+    private final Carte carte;
 
-    private int largeur;
-    private int hauteur;
+    private final int largeur;
+    private final int hauteur;
 
     public GestionnaireJeu(int largeurCarte, int hauteurCarte) {
         this.largeur = largeurCarte;
@@ -37,19 +37,7 @@ public class GestionnaireJeu {
         this.panier.apparitionPanier(carte.getObstacles());
     }
 
-    public Robot getRobot() {
-        return robot;
-    }
-
-    public List<Balle> getBalles() {
-        return balles;
-    }
-
-    public Carte getCarte() {
-        return carte;
-    }
-
-    public void apparitionBalle(int nombre) {
+    private void apparitionBalle(int nombre) {
         // Ajouter une balle à une position aléatoire et vérifier les collisions avec les obstacles et les autres balles
         int nbEssais = 0;
         while (balles.size() < nombre) {
@@ -67,6 +55,18 @@ public class GestionnaireJeu {
                 break;
             }
         }
+    }
+
+    public Robot getRobot() {
+        return robot;
+    }
+
+    public List<Balle> getBalles() {
+        return balles;
+    }
+
+    public Carte getCarte() {
+        return carte;
     }
 
     public void gererDeplacementRobot(int dx, int dy) {

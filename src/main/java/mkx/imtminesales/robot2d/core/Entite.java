@@ -69,11 +69,8 @@ public abstract class Entite {
 
     // Méthode pour mettre à jour la position en fonction de la vitesse
     public void mettreAJourPosition() {
-        // Limiter la vitesse totale à une valeur maximale
-        double norme = Math.sqrt(vitesseX * vitesseX + vitesseY * vitesseY);
-
         // Mettre à jour la position en fonction de la vitesse
-        position.deplacer((int) vitesseX, (int) vitesseY);
+        position.deplacer(vitesseX, vitesseY);
 
         // Appliquer le frottement pour réduire la vitesse progressivement
         vitesseX *= frottement;

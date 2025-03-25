@@ -16,9 +16,9 @@ public class Balle extends Entite {
         super(x, y, 20, 20, 5, Color.GREEN); // Taille 20x20, masse 5, couleur verte par défaut
         this.estAttrapee = false;
 
-        this.masse = 5;
+        this.masse = 15;
         this.coefficientRebond = 0.8;
-        this.frottement = 0.98;
+        this.frottement = 0.99;
     }
 
     public boolean estAttrapee() {

@@ -112,19 +112,19 @@ public class CollisionManager {
                balle.getPosition().getY() + balle.getLargeur() / 2 <= panier.getPosition().getY() + panier.getHauteur();
     }
 
-    private static boolean collisionRectangles(int x1, int y1, int largeur1, int hauteur1,
-                                               int x2, int y2, int largeur2, int hauteur2) {
+    private static boolean collisionRectangles(double x1, double y1, double largeur1, double hauteur1,
+                                               double x2, double y2, double largeur2, double hauteur2) {
         return x1 < x2 + largeur2 &&
                x1 + largeur1 > x2 &&
                y1 < y2 + hauteur2 &&
                y1 + hauteur1 > y2;
     }
 
-    private static boolean collisionCercles(int x1, int y1, int rayon1, int x2, int y2, int rayon2) {
-        int dx = x1 - x2;
-        int dy = y1 - y2;
-        int distanceCarree = dx * dx + dy * dy;
-        int rayonTotal = rayon1 + rayon2;
+    private static boolean collisionCercles(double x1, double y1, double rayon1, double x2, double y2, double rayon2) {
+        double dx = x1 - x2;
+        double dy = y1 - y2;
+        double distanceCarree = dx * dx + dy * dy;
+        double rayonTotal = rayon1 + rayon2;
         return distanceCarree <= rayonTotal * rayonTotal;
     }
 }
