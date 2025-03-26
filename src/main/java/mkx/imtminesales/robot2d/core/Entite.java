@@ -24,7 +24,7 @@ public abstract class Entite {
     public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur) {
         this.gestionnaireJeu = gestionnaireJeu;
         this.position = new Position2D(x, y);
-        this.rayTracing = new RayTracing(gestionnaireJeu, x, y, 40);
+        this.rayTracing = new RayTracing(gestionnaireJeu, x, y, 200);
 
         this.largeur = largeur;
         this.hauteur = hauteur;
@@ -47,6 +47,10 @@ public abstract class Entite {
         rayTracing.ajouterDirection(-1, 1); // Bas-gauche
         rayTracing.ajouterDirection(-1, -1); // Haut-gauche
         rayTracing.ajouterDirection(1, -1); // Haut-droite
+        rayTracing.ajouterDirection(Math.cos(Math.PI / 8), Math.sin(Math.PI / 8)); // Bas-droite (pi/8)
+        rayTracing.ajouterDirection(-Math.cos(Math.PI / 8), Math.sin(Math.PI / 8)); // Bas-gauche (7pi/8)
+        rayTracing.ajouterDirection(-Math.cos(Math.PI / 8), -Math.sin(Math.PI / 8)); // Haut-gauche (9pi/8)
+        rayTracing.ajouterDirection(Math.cos(Math.PI / 8), -Math.sin(Math.PI / 8)); // Haut-droite (15pi/8)
     }
 
     // Getter et setter pour la position
@@ -88,11 +92,20 @@ public abstract class Entite {
             boolean directionXValide = (deltaX > 0 && rayon.directionX > 0) || (deltaX < 0 && rayon.directionX < 0);
             boolean directionYValide = (deltaY > 0 && rayon.directionY > 0) || (deltaY < 0 && rayon.directionY < 0);
 
+            // Calculer la distance projetée sur la direction du déplacement
+            double distanceProjeteX = Math.abs(deltaX) / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
+            double distanceProjeteY = Math.abs(deltaY) / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
+
+            // Calculer la taille du rayon pour détecter les collisions en fonction de la largeur et de la hauteur et de la direction du rayon
+            double tailleRayonX = Math.abs(rayon.directionX) * largeur / 2;
+            double tailleRayonY = Math.abs(rayon.directionY) * hauteur / 2;
+            double tailleRayon = Math.sqrt(tailleRayonX * tailleRayonX + tailleRayonY * tailleRayonY);
+
             // Si un rayon détecte un obstacle dans la direction du déplacement
-            if (directionXValide && rayon.distance <= Math.abs(deltaX) + largeur / 2) {
+            if (directionXValide && rayon.distance <= distanceProjeteX + tailleRayon) {
                 bloquerX = true; // Bloquer le déplacement sur X
             }
-            if (directionYValide && rayon.distance <= Math.abs(deltaY) + hauteur / 2) {
+            if (directionYValide && rayon.distance <= distanceProjeteY + tailleRayon) {
                 bloquerY = true; // Bloquer le déplacement sur Y
             }
         }

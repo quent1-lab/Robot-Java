@@ -18,9 +18,11 @@ public class RayTracing {
     private List<Obstacle> obstacles; // Liste des obstacles à vérifier
 
     /**
-     * Représente un rayon avec son origine, sa direction et sa distance calculée.
+     * Représente un rayon avec son origine, sa direction et sa distance
+     * calculée.
      */
     public static class Rayon {
+
         public double origineX, origineY;
         public double directionX, directionY;
         public double distance;
@@ -37,10 +39,10 @@ public class RayTracing {
     /**
      * Constructeur de RayTracing.
      *
-     * @param origineX     Coordonnée X de l'origine des rayons.
-     * @param origineY     Coordonnée Y de l'origine des rayons.
-     * @param maxDistance  Distance maximale des rayons.
-     * @param obstacles    Liste des obstacles à vérifier.
+     * @param origineX Coordonnée X de l'origine des rayons.
+     * @param origineY Coordonnée Y de l'origine des rayons.
+     * @param maxDistance Distance maximale des rayons.
+     * @param obstacles Liste des obstacles à vérifier.
      */
     public RayTracing(GestionnaireJeu gestionnaireJeu, double origineX, double origineY, double maxDistance) {
         this.gestionnaireJeu = gestionnaireJeu;
@@ -55,6 +57,7 @@ public class RayTracing {
 
     /**
      * Retourne la liste des rayons.
+     *
      * @return Liste des rayons.
      */
     public List<Rayon> getRayons() {
@@ -97,8 +100,14 @@ public class RayTracing {
         gc.setLineWidth(1);
 
         for (Rayon rayon : rayons) {
-            double finX = rayon.origineX + rayon.directionX * rayon.distance;
-            double finY = rayon.origineY + rayon.directionY * rayon.distance;
+            // Normaliser la direction du rayon
+            double norme = Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
+            double dirX = rayon.directionX / norme;
+            double dirY = rayon.directionY / norme;
+
+            // Calculer la position finale du rayon
+            double finX = rayon.origineX + dirX * rayon.distance;
+            double finY = rayon.origineY + dirY * rayon.distance;
 
             // Dessiner le rayon
             gc.strokeLine(rayon.origineX, rayon.origineY, finX, finY);
@@ -106,8 +115,8 @@ public class RayTracing {
     }
 
     /**
-     * Lance un rayon depuis une origine dans une direction donnée et retourne la distance
-     * jusqu'au premier obstacle rencontré.
+     * Lance un rayon depuis une origine dans une direction donnée et retourne
+     * la distance jusqu'au premier obstacle rencontré.
      */
     private static double lancerRayon(double origineX, double origineY, double directionX, double directionY, List<Obstacle> obstacles, double maxDistance) {
         double distance = maxDistance; // Distance maximale du rayon
