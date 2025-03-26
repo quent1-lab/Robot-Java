@@ -70,6 +70,22 @@ public abstract class Entite {
         return hauteur;
     }
 
+    public double getVitesseX() {
+        return vitesseX;
+    }
+
+    public double getVitesseY() {
+        return vitesseY;
+    }
+
+    public void setVitesseX(double vitesseX) {
+        this.vitesseX = vitesseX;
+    }
+
+    public void setVitesseY(double vitesseY) {
+        this.vitesseY = vitesseY;
+    }
+
     // Méthode pour appliquer une force à l'entité
     public void appliquerForce(double forceX, double forceY) {
         this.vitesseX += forceX / masse;

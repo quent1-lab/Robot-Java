@@ -32,8 +32,10 @@ public class Balle extends Entite {
     }
 
     public void setDelta(){
-        deltaX_robot = position.getX() - gestionnaireJeu.getRobot().getPosition().getX();
-        deltaY_robot = position.getY() - gestionnaireJeu.getRobot().getPosition().getY();
+        if(estAttrapee) {
+            deltaX_robot = position.getX() - gestionnaireJeu.getRobot().getPosition().getX();
+            deltaY_robot = position.getY() - gestionnaireJeu.getRobot().getPosition().getY();
+        }
     }
 
     public void attraper() {
