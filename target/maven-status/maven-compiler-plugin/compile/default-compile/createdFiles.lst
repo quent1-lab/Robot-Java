@@ -1,7 +1,9 @@
 mkx\imtminesales\robot2d\core\Position2D.class
 mkx\imtminesales\robot2d_fx\App$1.class
+mkx\imtminesales\robot2d\physics\RayTracing$Rayon.class
 mkx\imtminesales\robot2d_fx\App.class
 mkx\imtminesales\robot2d\core\GestionnaireJeu.class
+mkx\imtminesales\robot2d\physics\RayTracing.class
 mkx\imtminesales\robot2d_fx\Obstacle.class
 mkx\imtminesales\robot2d_fx\SystemInfo.class
 mkx\imtminesales\robot2d\core\Entite.class

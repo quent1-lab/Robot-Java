@@ -26,7 +26,7 @@ public class CollisionManager {
 
         // Vérifier les collisions entre robots et obstacles
         if (collisionAvecObstacle(robot, obstacles)) {
-            robot.getPosition().retourEnArriere();
+            //robot.getPosition().retourEnArriere();
         }else{
             robot.deplacerBalles();
         }

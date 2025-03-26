@@ -88,6 +88,9 @@ public class Robot extends Entite {
     }
 
     public void dessiner(GraphicsContext gc) {
+        // Dessiner les rayons du robot
+        rayTracing.dessiner(gc);
+
         // Dessiner le robot sous forme de carré
         gc.setFill(couleur);
         gc.fillRect(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
