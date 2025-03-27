@@ -20,7 +20,7 @@ public class Robot extends Entite {
     private int score; // Score du robot
 
     public Robot(GestionnaireJeu gestionnaireJeu, int x, int y) {
-        super(gestionnaireJeu, x, y, 40, 40, 10, Color.BLUE,"rectangle"); // Taille 40x40, masse 10, couleur bleue
+        super(gestionnaireJeu, x, y, 40, 40, 10, Color.BLUE, "rectangle"); // Taille 40x40, masse 10, couleur bleue
         this.balles = new ArrayList<>();
         this.capaciteMax = 3;
         this.capaciteActuelle = 0;
@@ -98,15 +98,46 @@ public class Robot extends Entite {
     }
 
     public void dessiner(GraphicsContext gc) {
-        // Dessiner les rayons du robot
+        // Dessiner rayon de détection
         rayTracing.dessiner(gc);
 
-        // Dessiner le robot sous forme de carré
+        // Dessiner une ombre pour le robot
+        gc.setFill(Color.DARKGRAY);
+        //gc.fillRect(position.getX() - largeur / 2 + 3, position.getY() - hauteur / 2 + 3, largeur, hauteur);
+
+        // Dessiner le corps principal du robot (carré)
         gc.setFill(couleur);
         gc.fillRect(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
 
-        // Ecrire la vitesse du robot au dessus de lui
+        // Dessiner une bordure autour du robot
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+        gc.strokeRect(position.getX() - largeur / 2, position.getY() - hauteur / 2, largeur, hauteur);
+
+        // Ajouter un motif interne ressemblant à une cible
+        gc.setStroke(Color.DARKGRAY);
+        gc.setLineWidth(1);
+
+        // Dessiner un cercle au centre du robot
+        gc.strokeOval(position.getX() - largeur / 4, position.getY() - hauteur / 4, largeur / 2, hauteur / 2);
+
+        // Dessiner deux traits croisés (horizontal et vertical)
+        gc.strokeLine(position.getX() - largeur / 2 + 2, position.getY(),
+                position.getX() + largeur / 2 - 2, position.getY());
+        gc.strokeLine(position.getX(), position.getY() - hauteur / 2 + 2,
+                position.getX(), position.getY() + hauteur / 2 - 2);
+
+        // Ajouter un effet visuel pour indiquer la vitesse
+        if (Math.abs(vitesseX) > 0.1 || Math.abs(vitesseY) > 0.1) {
+            gc.setStroke(Color.BROWN);
+            gc.setLineWidth(2);
+            gc.strokeLine(position.getX(), position.getY(),
+                    position.getX() + vitesseX * 5, position.getY() + vitesseY * 5);
+        }
+
+        // Écrire la vitesse du robot au-dessus de lui
         gc.setFill(Color.BLACK);
-        gc.fillText(String.format("Vx: %.2f Vy: %.2f", vitesseX, vitesseY), position.getX() - largeur / 2, position.getY() - hauteur / 2);
+        gc.fillText(String.format("Vx: %.2f Vy: %.2f", vitesseX, vitesseY),
+                position.getX() - largeur / 2, position.getY() - hauteur / 2 - 5);
     }
 }
