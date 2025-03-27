@@ -78,6 +78,10 @@ public class GestionnaireJeu {
         return panier;
     }
 
+    public CollisionManager getCollisionManager() {
+        return collisionMng;
+    }
+
     public void gererDeplacementRobot(int dx, int dy) {
         robot.appliquerForce(dx, dy);
         //collisionRobotObstacles();

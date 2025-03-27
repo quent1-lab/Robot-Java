@@ -14,14 +14,16 @@ public abstract class Entite {
 
     protected double vitesseX; // Vitesse sur l'axe X
     protected double vitesseY; // Vitesse sur l'axe Y
+    protected double amplificationVitesse; // Amplification de la vitesse
     protected double masse; // Masse de l'entité
     protected double coefficientRebond; // Coefficient de rebond (entre 0 et 1)
     protected double frottement; // Coefficient de frottement (entre 0 et 1)
     protected int largeur; // Largeur de l'entité
     protected int hauteur; // Hauteur de l'entité
     protected Color couleur; // Couleur de l'entité
+    protected String forme; // Forme de l'entité
 
-    public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur) {
+    public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur, String forme) {
         this.gestionnaireJeu = gestionnaireJeu;
         this.position = new Position2D(x, y);
         this.rayTracing = new RayTracing(gestionnaireJeu, x, y, 200);
@@ -30,10 +32,12 @@ public abstract class Entite {
         this.hauteur = hauteur;
         this.masse = masse;
         this.couleur = couleur;
+        this.forme = forme;
         this.vitesseX = 0;
         this.vitesseY = 0;
         this.coefficientRebond = 0.8; // Par défaut, un rebond modéré
         this.frottement = 0.98; // Par défaut, un léger frottement
+        this.amplificationVitesse = 1;
 
         initialisationRayTracing();
     }
@@ -86,10 +90,14 @@ public abstract class Entite {
         this.vitesseY = vitesseY;
     }
 
+    public String getForme() {
+        return forme;
+    }
+
     // Méthode pour appliquer une force à l'entité
     public void appliquerForce(double forceX, double forceY) {
-        this.vitesseX += forceX / masse;
-        this.vitesseY += forceY / masse;
+        this.vitesseX += forceX * amplificationVitesse / masse;
+        this.vitesseY += forceY * amplificationVitesse / masse;
     }
 
     public void deplacerAvecRayTracing(double deltaX, double deltaY) {
@@ -138,11 +146,42 @@ public abstract class Entite {
         position.deplacer(deltaX, deltaY);
     }
 
+    public void deplacerCollision(double dt) {
+        // Vérifier pour chaque axe individuellement si un déplacement est possible
+
+        // Déplacement sur l'axe X
+        position.deplacer(vitesseX, 0);
+        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
+            if (Math.abs(vitesseX) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
+                vitesseX = -vitesseX * coefficientRebond; // Inverser la vitesse avec un rebond
+            } else {
+                position.deplacer(-vitesseX, 0);
+                vitesseX = 0; // Sinon, arrêter complètement le mouvement sur X
+            }
+            position.deplacer(vitesseX, 0);
+        }
+
+        // Déplacement sur l'axe Y
+        position.deplacer(0, vitesseY);
+        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
+            if (Math.abs(vitesseY) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
+                vitesseY = -vitesseY * coefficientRebond; // Inverser la vitesse avec un rebond
+            } else {
+                position.deplacer(0, -vitesseY);
+                vitesseY = 0; // Sinon, arrêter complètement le mouvement sur Y
+            }
+            position.deplacer(0, vitesseY);
+        }
+    }
+
     // Méthode pour mettre à jour la position en fonction de la vitesse
     public void mettreAJourPosition(double dt) {
+        rayTracing.mettreAJour();
+
         // Mettre à jour la position en fonction de la vitesse
         //position.deplacer(vitesseX, vitesseY);
-        deplacerAvecRayTracing(vitesseX, vitesseY);
+        //deplacerAvecRayTracing(vitesseX, vitesseY);
+        deplacerCollision(dt);
 
         // Appliquer le frottement pour réduire la vitesse progressivement
         vitesseX *= frottement;

@@ -17,7 +17,7 @@ public class Balle extends Entite {
     private static final double FROTTEMENT_BALLE = 0.99; // Coefficient de frottement
 
     public Balle(GestionnaireJeu gestionnaireJeu, int x, int y) {
-        super(gestionnaireJeu, x, y, 20, 20, 15, Color.GREEN); // Taille 20x20, masse 5, couleur verte par défaut
+        super(gestionnaireJeu, x, y, 20, 20, 15, Color.GREEN,"cercle"); // Taille 20x20, masse 5, couleur verte par défaut
         this.estAttrapee = false;
 
         deltaX_robot = 0;

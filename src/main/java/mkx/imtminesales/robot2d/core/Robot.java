@@ -20,14 +20,15 @@ public class Robot extends Entite {
     private int score; // Score du robot
 
     public Robot(GestionnaireJeu gestionnaireJeu, int x, int y) {
-        super(gestionnaireJeu, x, y, 40, 40, 10, Color.BLUE); // Taille 40x40, masse 10, couleur bleue
+        super(gestionnaireJeu, x, y, 40, 40, 10, Color.BLUE,"rectangle"); // Taille 40x40, masse 10, couleur bleue
         this.balles = new ArrayList<>();
         this.capaciteMax = 3;
         this.capaciteActuelle = 0;
         this.score = 0;
 
         this.coefficientRebond = 0.8;
-        this.frottement = 0.95;
+        this.frottement = 0.9;
+        this.amplificationVitesse = 4;
     }
 
     public List<Balle> getBalles() {

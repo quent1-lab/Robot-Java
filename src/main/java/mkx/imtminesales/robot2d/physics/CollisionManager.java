@@ -3,6 +3,7 @@ package mkx.imtminesales.robot2d.physics;
 import java.util.List;
 
 import mkx.imtminesales.robot2d.core.Balle;
+import mkx.imtminesales.robot2d.core.Entite;
 import mkx.imtminesales.robot2d.core.GestionnaireJeu;
 import mkx.imtminesales.robot2d.core.Robot;
 import mkx.imtminesales.robot2d_fx.Carte;
@@ -77,6 +78,38 @@ public class CollisionManager {
         return false;
     }
 
+    public boolean collisionEntiteAvecObstacle(Entite entite, List<Obstacle> obstacles) {
+        // Vérifier la forme de l'entité pour les collisions
+        if (entite.getForme().equals("rectangle")) {
+            for (Obstacle obstacle : obstacles) {
+                if (collisionRectangles(
+                        entite.getPosition().getX() - entite.getLargeur() / 2,
+                        entite.getPosition().getY() - entite.getHauteur() / 2,
+                        entite.getLargeur(),
+                        entite.getHauteur(),
+                        obstacle.getX(),
+                        obstacle.getY(),
+                        obstacle.getLargeur(),
+                        obstacle.getHauteur())) {
+                    return true;
+                }
+            }
+        } else if (entite.getForme().equals("cercle")) {
+            for (Obstacle obstacle : obstacles) {
+                if (collisionCercles(
+                        entite.getPosition().getX(),
+                        entite.getPosition().getY(),
+                        entite.getLargeur() / 2 * 0.9,
+                        obstacle.getX() + obstacle.getLargeur() / 2,
+                        obstacle.getY() + obstacle.getHauteur() / 2,
+                        Math.sqrt(obstacle.getLargeur() * obstacle.getLargeur() + obstacle.getHauteur() * obstacle.getHauteur()) / 2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Modifier la méthode collisionBalleAvecObstacle pour inclure le rebond
     public static boolean collisionBalleAvecObstacle(Balle balle, List<Obstacle> obstacles) {
         for (Obstacle obstacle : obstacles) {
@@ -90,23 +123,23 @@ public class CollisionManager {
                     obstacle.getLargeur(),
                     obstacle.getHauteur())) {
 
-                // Calculer la normale de collision
-                double normaleX = 0;
-                double normaleY = 0;
+                // // Calculer la normale de collision
+                // double normaleX = 0;
+                // double normaleY = 0;
 
-                if (balle.getPosition().getX() < obstacle.getX()) {
-                    normaleX = -1; // Collision à gauche
-                } else if (balle.getPosition().getX() > obstacle.getX() + obstacle.getLargeur()) {
-                    normaleX = 1; // Collision à droite
-                }
+                // if (balle.getPosition().getX() < obstacle.getX()) {
+                //     normaleX = -1; // Collision à gauche
+                // } else if (balle.getPosition().getX() > obstacle.getX() + obstacle.getLargeur()) {
+                //     normaleX = 1; // Collision à droite
+                // }
 
-                if (balle.getPosition().getY() < obstacle.getY()) {
-                    normaleY = -1; // Collision en haut
-                } else if (balle.getPosition().getY() > obstacle.getY() + obstacle.getHauteur()) {
-                    normaleY = 1; // Collision en bas
-                }
+                // if (balle.getPosition().getY() < obstacle.getY()) {
+                //     normaleY = -1; // Collision en haut
+                // } else if (balle.getPosition().getY() > obstacle.getY() + obstacle.getHauteur()) {
+                //     normaleY = 1; // Collision en bas
+                // }
 
-                recalculerVitesseApresCollision(balle, normaleX, normaleY);
+                // recalculerVitesseApresCollision(balle, normaleX, normaleY);
                 return true;
             }
         }
