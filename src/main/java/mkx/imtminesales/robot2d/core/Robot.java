@@ -26,7 +26,7 @@ public class Robot extends Entite {
         this.capaciteActuelle = 0;
         this.score = 0;
 
-        this.coefficientRebond = 0.8;
+        this.coefficientRebond = 0.6;
         this.frottement = 0.9;
         this.amplificationVitesse = 4;
     }
@@ -137,7 +137,8 @@ public class Robot extends Entite {
 
         // Écrire la vitesse du robot au-dessus de lui
         gc.setFill(Color.BLACK);
-        gc.fillText(String.format("Vx: %.2f Vy: %.2f", vitesseX, vitesseY),
-                position.getX() - largeur / 2, position.getY() - hauteur / 2 - 5);
+        String vitesse = String.format("Vx: %.2f Vy: %.2f", vitesseX, vitesseY);
+        double tailleVitesse = gc.getFont().getSize() / 2.5 * vitesse.length() / 2;
+        gc.fillText(vitesse, position.getX() - tailleVitesse, position.getY() - hauteur / 2 - 5);
     }
 }

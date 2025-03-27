@@ -23,10 +23,11 @@ public abstract class Entite {
     protected Color couleur; // Couleur de l'entité
     protected String forme; // Forme de l'entité
 
-    public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur, String forme) {
+    public Entite(GestionnaireJeu gestionnaireJeu, int x, int y, int largeur, int hauteur, double masse, Color couleur,
+            String forme) {
         this.gestionnaireJeu = gestionnaireJeu;
         this.position = new Position2D(x, y);
-        this.rayTracing = new RayTracing(gestionnaireJeu, x, y, 200);
+        this.rayTracing = new RayTracing(gestionnaireJeu, x, y, 1000);
 
         this.largeur = largeur;
         this.hauteur = hauteur;
@@ -39,7 +40,7 @@ public abstract class Entite {
         this.frottement = 0.98; // Par défaut, un léger frottement
         this.amplificationVitesse = 1;
 
-        initialisationRayTracing();
+        initialisationRayTracing(10);
     }
 
     private void initialisationRayTracing() {
@@ -55,6 +56,14 @@ public abstract class Entite {
         rayTracing.ajouterDirection(-Math.cos(Math.PI / 8), Math.sin(Math.PI / 8)); // Bas-gauche (7pi/8)
         rayTracing.ajouterDirection(-Math.cos(Math.PI / 8), -Math.sin(Math.PI / 8)); // Haut-gauche (9pi/8)
         rayTracing.ajouterDirection(Math.cos(Math.PI / 8), -Math.sin(Math.PI / 8)); // Haut-droite (15pi/8)
+    }
+
+    private void initialisationRayTracing(int angle){
+        // Ajoute tous les rayons pour un angle donné
+        for (int i = 0; i < 360; i += angle) {
+            double angleRad = Math.toRadians(i);
+            rayTracing.ajouterDirection(Math.cos(angleRad), Math.sin(angleRad));
+        }
     }
 
     // Getter et setter pour la position
@@ -117,10 +126,13 @@ public abstract class Entite {
             boolean directionYValide = (deltaY > 0 && rayon.directionY > 0) || (deltaY < 0 && rayon.directionY < 0);
 
             // Calculer la distance projetée sur la direction du déplacement
-            double distanceProjeteX = Math.abs(deltaX) / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
-            double distanceProjeteY = Math.abs(deltaY) / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
+            double distanceProjeteX = Math.abs(deltaX)
+                    / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
+            double distanceProjeteY = Math.abs(deltaY)
+                    / Math.sqrt(rayon.directionX * rayon.directionX + rayon.directionY * rayon.directionY);
 
-            // Calculer la taille du rayon pour détecter les collisions en fonction de la largeur et de la hauteur et de la direction du rayon
+            // Calculer la taille du rayon pour détecter les collisions en fonction de la
+            // largeur et de la hauteur et de la direction du rayon
             double tailleRayonX = Math.abs(rayon.directionX) * largeur / 2;
             double tailleRayonY = Math.abs(rayon.directionY) * hauteur / 2;
             double tailleRayon = Math.sqrt(tailleRayonX * tailleRayonX + tailleRayonY * tailleRayonY);
@@ -151,7 +163,8 @@ public abstract class Entite {
 
         // Déplacement sur l'axe X
         position.deplacer(vitesseX, 0);
-        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
+        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this,
+                gestionnaireJeu.getCarte().getObstacles())) {
             if (Math.abs(vitesseX) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
                 vitesseX = -vitesseX * coefficientRebond; // Inverser la vitesse avec un rebond
                 position.deplacer(vitesseX, 0);
@@ -163,7 +176,8 @@ public abstract class Entite {
 
         // Déplacement sur l'axe Y
         position.deplacer(0, vitesseY);
-        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
+        if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this,
+                gestionnaireJeu.getCarte().getObstacles())) {
             if (Math.abs(vitesseY) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
                 vitesseY = -vitesseY * coefficientRebond; // Inverser la vitesse avec un rebond
                 position.deplacer(0, vitesseY);
@@ -179,8 +193,8 @@ public abstract class Entite {
         rayTracing.mettreAJour();
 
         // Mettre à jour la position en fonction de la vitesse
-        //position.deplacer(vitesseX, vitesseY);
-        //deplacerAvecRayTracing(vitesseX, vitesseY);
+        // position.deplacer(vitesseX, vitesseY);
+        // deplacerAvecRayTracing(vitesseX, vitesseY);
         deplacerCollision(dt);
 
         // Appliquer le frottement pour réduire la vitesse progressivement
@@ -203,6 +217,7 @@ public abstract class Entite {
         }
     }
 
-    // Méthode abstraite pour dessiner l'entité (à implémenter dans les sous-classes)
+    // Méthode abstraite pour dessiner l'entité (à implémenter dans les
+    // sous-classes)
     public abstract void dessiner(GraphicsContext gc);
 }

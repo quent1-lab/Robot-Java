@@ -20,6 +20,8 @@ public class GestionnaireJeu {
     public final int largeur;
     public final int hauteur;
 
+    private double tempsEcoule; // Temps écoulé en secondes
+
     public GestionnaireJeu(int largeurCarte, int hauteurCarte) {
         this.largeur = largeurCarte;
         this.hauteur = hauteurCarte;
@@ -32,7 +34,7 @@ public class GestionnaireJeu {
 
         // Initialiser les balles à des positions aléatoires
         this.balles = new ArrayList<>();
-        this.apparitionBalle(5);
+        this.apparitionBalle(50);
 
         // Initialiser le panier
         this.panier = new Panier(largeurCarte, hauteurCarte);
@@ -43,19 +45,19 @@ public class GestionnaireJeu {
     }
 
     private void apparitionBalle(int nombre) {
-        // Ajouter une balle à une position aléatoire et vérifier les collisions avec les obstacles et les autres balles
+        // Ajouter une balle à une position aléatoire et vérifier les collisions avec
+        // les obstacles et les autres balles
         int nbEssais = 0;
         while (balles.size() < nombre) {
             Balle balle = new Balle(this,
-                    (int) (Math.random() * largeur),
-                    (int) (Math.random() * hauteur)
-            );
+                    (int) (Math.random() * (largeur - 10 - 20)),
+                    (int) (Math.random() * hauteur - 10 - 20));
             if (!CollisionManager.collisionBalleAvecObstacle(balle, carte.getObstacles())
                     && !CollisionManager.collisionBalleAvecBalles(balles)) {
                 balles.add(balle);
             }
             nbEssais++;
-            if (nbEssais > 1000) {
+            if (nbEssais > 1000000) {
                 System.out.println("Impossible de générer une balle sans collision !");
                 break;
             }
@@ -84,7 +86,7 @@ public class GestionnaireJeu {
 
     public void gererDeplacementRobot(int dx, int dy) {
         robot.appliquerForce(dx, dy);
-        //collisionRobotObstacles();
+        // collisionRobotObstacles();
     }
 
     public void actionBalle() {
@@ -94,20 +96,23 @@ public class GestionnaireJeu {
     }
 
     public void supprimerBalle(Balle balle) {
-        balles.remove(balle);
+        balles.removeIf(b -> b == balle); // Supprime la balle sans provoquer de ConcurrentModificationException
     }
 
     public void mettreAJour(double dt) {
+        // Mettre à jour le temps écoulé
+        tempsEcoule += dt;
+
         // Mettre à jour les déplcement du robot et des balles
         robot.mettreAJourPosition(dt);
 
         for (Balle balle : balles) {
             balle.mettreAJourPosition(dt);
         }
-        
+
         collisionMng.mettreAJourCollisions(dt);
     }
-    
+
     public void dessiner(GraphicsContext gc) {
         // Dessiner la carte
         carte.dessinerCarte(gc);
@@ -127,5 +132,11 @@ public class GestionnaireJeu {
         gc.setFill(javafx.scene.paint.Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 16));
         gc.fillText("Score : " + robot.getScore(), 10, 17);
+        gc.fillText("Balles restantes : " + balles.size(), 100, 17);
+
+        // Afficher le temps écoulé
+        int minutes = (int) (tempsEcoule / 60);
+        int secondes = (int) (tempsEcoule % 60);
+        gc.fillText(String.format("Temps : %02d:%02d", minutes, secondes), 650, 17);
     }
 }
