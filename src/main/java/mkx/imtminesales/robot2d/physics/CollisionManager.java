@@ -1,6 +1,5 @@
 package mkx.imtminesales.robot2d.physics;
 
-import java.util.Iterator;
 import java.util.List;
 
 import mkx.imtminesales.robot2d.core.Balle;
@@ -52,11 +51,9 @@ public class CollisionManager {
         if (collisionBalleAvecBalles(balles)) {
 
         }
-
+        
         // Vérifier les collisions entre balles et le panier
-        Iterator<Balle> iter = balles.iterator();
-        while (iter.hasNext()) {
-            Balle balle = iter.next();
+        for (Balle balle : balles) {
             if (collisionBalleAvecPanier(balle, panier) && !balle.estAttrapee()) {
                 gestionnaireJeu.supprimerBalle(balle);
                 robot.incrementerScore();

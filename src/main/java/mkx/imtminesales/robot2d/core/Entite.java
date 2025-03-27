@@ -103,6 +103,10 @@ public abstract class Entite {
         return forme;
     }
 
+    public RayTracing getRayTracing() {
+        return rayTracing;
+    }
+
     // Méthode pour appliquer une force à l'entité
     public void appliquerForce(double forceX, double forceY) {
         this.vitesseX += forceX * amplificationVitesse / masse;

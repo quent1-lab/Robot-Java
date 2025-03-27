@@ -47,6 +47,12 @@ public class App extends Application {
 
         fenetre.setTitle("Simulation Robot v0.2");
         fenetre.setScene(scene);
+
+        // Ajouter un gestionnaire pour arrêter le jeu à la fermeture de la fenêtre
+        fenetre.setOnCloseRequest(event -> {
+            gestionnaireJeu.arreterJeu(); // Appeler la méthode pour arrêter le jeu
+        });
+
         fenetre.show();
 
         // Utiliser AnimationTimer pour la boucle d'animation
