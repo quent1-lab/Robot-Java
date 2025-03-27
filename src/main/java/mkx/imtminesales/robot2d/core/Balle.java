@@ -17,7 +17,7 @@ public class Balle extends Entite {
     private static final double FROTTEMENT_BALLE = 0.99; // Coefficient de frottement
 
     public Balle(GestionnaireJeu gestionnaireJeu, int x, int y) {
-        super(gestionnaireJeu, x, y, 20, 20, 15, Color.GREEN,"cercle"); // Taille 20x20, masse 5, couleur verte par défaut
+        super(gestionnaireJeu, x, y, 20, 20, 15, Color.GREEN, "cercle"); // Taille 20x20, masse 5, couleur verte par défaut
         this.estAttrapee = false;
 
         deltaX_robot = 0;
@@ -31,8 +31,8 @@ public class Balle extends Entite {
         return estAttrapee;
     }
 
-    public void setDelta(){
-        if(estAttrapee) {
+    public void setDelta() {
+        if (estAttrapee) {
             deltaX_robot = position.getX() - gestionnaireJeu.getRobot().getPosition().getX();
             deltaY_robot = position.getY() - gestionnaireJeu.getRobot().getPosition().getY();
         }
@@ -56,6 +56,22 @@ public class Balle extends Entite {
         estAttrapee = false;
     }
 
+    public void lancer() {
+        estAttrapee = false;
+        deltaX_robot = 0;
+        deltaY_robot = 0;
+
+        // Si la vitesse est nulle, lancer vers le haut
+        if (vitesseX == 0 && vitesseY == 0) {
+            vitesseX = -6; // Lancer vers le haut avec une vitesse par défaut
+        } else {
+            // Normaliser la direction de lancement
+            double norme = Math.sqrt(vitesseX * vitesseX + vitesseY * vitesseY);
+            vitesseX = vitesseX / norme * 6;
+            vitesseY = vitesseY / norme * 6;
+        }
+    }
+
     @Override
     public void mettreAJourPosition(double dt) {
         // Appliquer les règles de physique uniquement si la balle n'est pas attrapée
@@ -64,7 +80,7 @@ public class Balle extends Entite {
             double newX = gestionnaireJeu.getRobot().getPosition().getX() + deltaX_robot;
             double newY = gestionnaireJeu.getRobot().getPosition().getY() + deltaY_robot;
 
-            vitesseX = (newX - position.getX())  / frottement;
+            vitesseX = (newX - position.getX()) / frottement;
             vitesseY = (newY - position.getY()) / frottement;
         }
         super.mettreAJourPosition(dt);

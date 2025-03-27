@@ -88,6 +88,15 @@ public class Robot extends Entite {
         return null;
     }
 
+    public void lancerBalle() {
+        // Lancer la première balle attrapée
+        if (!this.balles.isEmpty()) {
+            Balle balle = this.balles.remove(0);
+            balle.lancer();
+            capaciteActuelle--;
+        }
+    }
+
     public void dessiner(GraphicsContext gc) {
         // Dessiner les rayons du robot
         rayTracing.dessiner(gc);

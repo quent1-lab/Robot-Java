@@ -154,11 +154,11 @@ public abstract class Entite {
         if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
             if (Math.abs(vitesseX) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
                 vitesseX = -vitesseX * coefficientRebond; // Inverser la vitesse avec un rebond
+                position.deplacer(vitesseX, 0);
             } else {
                 position.deplacer(-vitesseX, 0);
                 vitesseX = 0; // Sinon, arrêter complètement le mouvement sur X
             }
-            position.deplacer(vitesseX, 0);
         }
 
         // Déplacement sur l'axe Y
@@ -166,11 +166,11 @@ public abstract class Entite {
         if (gestionnaireJeu.getCollisionManager().collisionEntiteAvecObstacle(this, gestionnaireJeu.getCarte().getObstacles())) {
             if (Math.abs(vitesseY) > 0.2) { // Vérifier si la vitesse dépasse une certaine valeur
                 vitesseY = -vitesseY * coefficientRebond; // Inverser la vitesse avec un rebond
+                position.deplacer(0, vitesseY);
             } else {
                 position.deplacer(0, -vitesseY);
                 vitesseY = 0; // Sinon, arrêter complètement le mouvement sur Y
             }
-            position.deplacer(0, vitesseY);
         }
     }
 

@@ -29,6 +29,7 @@ public class App extends Application {
 
     private final Set<KeyCode> touchesAppuyees = new HashSet<>(); // Suivi des touches pressées
     private boolean espaceAppuye = false; // Variable pour suivre l'état de la touche ESPACE
+    private boolean eAppuye = false; // Variable pour suivre l'état de la touche E
 
     @Override
     public void start(Stage fenetre) {
@@ -105,6 +106,14 @@ public class App extends Application {
             }
         } else {
             espaceAppuye = false; // Réinitialiser l'état lorsque la touche est relâchée
+        }
+        if (touchesAppuyees.contains(KeyCode.E)) {
+            if (!eAppuye) { // Si la touche E vient d'être pressée
+                eAppuye = true;
+                gestionnaireJeu.getRobot().lancerBalle();
+            }
+        } else {
+            eAppuye = false; // Réinitialiser l'état lorsque la touche est relâchée
         }
     }
 
