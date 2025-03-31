@@ -7,6 +7,7 @@ import static java.lang.Math.toDegrees;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import mkx.imtminesales.robot2d.core.GestionnaireJeu;
@@ -28,6 +29,7 @@ public class IA {
     private String previousState = null;
     private int previousAction = -1;
     private int previousScore = 0;
+    private double previousRewards = 0.0;
     private int nbActions = 11; // Nombre total d'actions (8 directions + 3 actions spéciales)
 
     private Random random;
@@ -59,9 +61,9 @@ public class IA {
         this.gestionnaire = gestionnaire;
         this.robot = gestionnaire.getRobot();
         this.qTable = new HashMap<>();
-        this.epsilon = 0.2;
-        this.alpha = 0.1;
-        this.gamma = 0.9;
+        this.epsilon = 0.3;
+        this.alpha = 0.12;
+        this.gamma = 0.85;
         this.previousScore = robot.getScore();
         this.random = new Random();
     }
@@ -74,14 +76,14 @@ public class IA {
         iteration++;
         // Optionnel : ajuster périodiquement epsilon/alpha (ici on peut les réduire
         // doucement)
-        if (iteration % 1000 == 0) {
+        if (iteration % 5000 == 0) {
             epsilon = Math.max(0.05, epsilon * 0.95);
             alpha = Math.max(0.01, alpha * 0.995);
         }
 
         // Mise à jour des rayons pour avoir les dernières observations
         robot.getRayTracing().mettreAJour();
-
+ 
         // Discrétiser l'état à partir de 4 directions clés ET du nombre de balles
         // détenues
         String state = discretiserEtat();
@@ -96,7 +98,7 @@ public class IA {
         // Récompense/pénalité basée sur les rayons
         double rewardRayons = 0;
         for (RayTracing.Rayon rayon : robot.getRayTracing().getRayons()) {
-            if ("Obstacle".equals(rayon.typeObjet) && rayon.distance < 30) {
+            if ("Obstacle".equals(rayon.typeObjet) && rayon.distance < 40) {
                 rewardRayons -= 10; // forte pénalité si obstacle très proche
             }
             if ("Balle".equals(rayon.typeObjet)) {
@@ -144,6 +146,12 @@ public class IA {
         if (robot.aUneBalle() && distanceAuPanier < 100) {
             reward += 15;
         }
+        if (robot.aUneBalle() && distanceAuPanier < 50) {
+            reward += 30;
+        }
+        if (robot.aUneBalle() && distanceAuPanier < 20) {
+            reward += 50;
+        }
 
         // Mise à jour de la Q-table pour la transition précédente
         if (previousState != null && previousAction != -1) {
@@ -173,6 +181,7 @@ public class IA {
         previousState = state;
         previousAction = action;
         previousScore = currentScore;
+        previousRewards = reward;
     }
 
     /**
@@ -355,9 +364,10 @@ public class IA {
     public void dessiner(GraphicsContext gc) {
         gc.setFill(Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 16));
-        gc.fillText("Epsilon: " + String.format("%.2f", epsilon), 250, 17);
-        gc.fillText("Alpha: " + String.format("%.2f", alpha), 350, 17);
-        gc.fillText("Gamma: " + String.format("%.2f", gamma), 450, 17);
-        gc.fillText("Action: " + previousAction, 550, 17);
+        gc.fillText("Epsilon: " + String.format("%.2f", epsilon), 20, gestionnaire.hauteur - 2);
+        gc.fillText("Alpha: " + String.format("%.2f", alpha), 120, gestionnaire.hauteur - 2);
+        gc.fillText("Gamma: " + String.format("%.2f", gamma), 220, gestionnaire.hauteur - 2);
+        gc.fillText("Reward: " + String.format("%.2f", previousRewards), 320, gestionnaire.hauteur - 2);
+        gc.fillText("State: " + previousState, 420, gestionnaire.hauteur - 2);
     }
 }

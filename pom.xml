@@ -15,6 +15,19 @@
             <artifactId>javafx-controls</artifactId>
             <version>13</version>
         </dependency>
+        <!-- DeepLearning4J Core -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>1.0.0-M2.1</version> <!-- Vérifiez la dernière version sur Maven Central -->
+        </dependency>
+
+        <!-- ND4J Backend (CPU) -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native-platform</artifactId>
+            <version>1.0.0-M2.1</version> <!-- Vérifiez la dernière version -->
+        </dependency>
     </dependencies>
     <build>
         <plugins>
