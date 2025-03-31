@@ -97,6 +97,26 @@ public class Robot extends Entite {
         }
     }
 
+    public boolean aUneBalle() {
+        // Vérifier si le robot a une balle
+        return !this.balles.isEmpty();
+    }
+
+    public int balleAttrapee() {
+        // Retourner le nombre de balles attrapées
+        return this.capaciteActuelle;
+    }
+
+    public boolean peutAttraperBalle() {
+        // Vérifier si le robot peut attraper une balle
+        return this.capaciteActuelle < this.capaciteMax;
+    }
+
+    public boolean aLanceBalleAvecSucces() {
+        // Vérifier si le robot a lancé une balle avec succès
+        return false;
+    }
+
     public void dessiner(GraphicsContext gc) {
         // Dessiner rayon de détection
         rayTracing.dessiner(gc);

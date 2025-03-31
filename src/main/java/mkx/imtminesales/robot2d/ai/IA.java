@@ -7,7 +7,6 @@ import static java.lang.Math.toDegrees;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import mkx.imtminesales.robot2d.core.GestionnaireJeu;
@@ -20,7 +19,7 @@ public class IA {
     private Robot robot;
 
     // Paramètres de Q-learning
-    private Map<String, double[]> qTable; // clé: état discretisé, valeur: Q-values pour chacune des 8 actions
+    private Map<String, double[]> qTable; // clé: état discrétisé, valeur: Q-values pour chacune des 11 actions
     private double epsilon; // taux d'exploration
     private double alpha; // taux d'apprentissage
     private double gamma; // facteur de discount
@@ -29,131 +28,192 @@ public class IA {
     private String previousState = null;
     private int previousAction = -1;
     private int previousScore = 0;
+    private int nbActions = 11; // Nombre total d'actions (8 directions + 3 actions spéciales)
 
     private Random random;
 
-    // Définition des 8 actions possibles (vecteurs normalisés)
-    // 0: Nord, 1: Nord-Est, 2: Est, 3: Sud-Est, 4: Sud, 5: Sud-Ouest, 6: Ouest, 7:
-    // Nord-Ouest
+    // Actions spéciales
+    private final int ACTION_ATTRAPER = 8;
+    private final int ACTION_RELACHER = 9;
+    private final int ACTION_LANCER = 10;
+
+    // Définition des 11 actions possibles (8 directions + 3 actions spéciales)
+    // Pour les déplacements, on utilise des vecteurs normalisés
     private final double[][] actions = {
-            { 0, -1 },
-            { 1 / sqrt(2), -1 / sqrt(2) },
-            { 1, 0 },
-            { 1 / sqrt(2), 1 / sqrt(2) },
-            { 0, 1 },
-            { -1 / sqrt(2), 1 / sqrt(2) },
-            { -1, 0 },
-            { -1 / sqrt(2), -1 / sqrt(2) }
+            { 0, -1 }, // 0: Nord
+            { 1 / sqrt(2), -1 / sqrt(2) }, // 1: Nord-Est
+            { 1, 0 }, // 2: Est
+            { 1 / sqrt(2), 1 / sqrt(2) }, // 3: Sud-Est
+            { 0, 1 }, // 4: Sud
+            { -1 / sqrt(2), 1 / sqrt(2) }, // 5: Sud-Ouest
+            { -1, 0 }, // 6: Ouest
+            { -1 / sqrt(2), -1 / sqrt(2) }, // 7: Nord-Ouest
+            null, // 8: Attraper
+            null, // 9: Relâcher
+            null // 10: Lancer
     };
+
+    private int iteration = 0;
 
     public IA(GestionnaireJeu gestionnaire) {
         this.gestionnaire = gestionnaire;
         this.robot = gestionnaire.getRobot();
-
         this.qTable = new HashMap<>();
         this.epsilon = 0.2;
         this.alpha = 0.1;
         this.gamma = 0.9;
-
         this.previousScore = robot.getScore();
         this.random = new Random();
     }
 
     /**
-     * Méthode d'actualisation de l'IA appelée à chaque frame de mise à jour.
-     * Elle utilise uniquement les données issues du raytracing pour constituer
-     * l'état.
+     * Méthode d'actualisation de l'IA appelée à chaque frame.
+     * Utilise uniquement les données issues du raytracing pour constituer l'état.
      */
     public void update() {
-        // Mettre à jour les rayons du robot (les informations "visuelles")
-        robot.getRayTracing().mettreAJour();
-
-        // Discrétisation de l'état à partir de 4 directions clés : avant (0°), gauche
-        // (90°), arrière (180°) et droite (270°)
-        String state = discretiserEtat();
-
-        // Calculer le reward basé sur l'évolution du score et la proximité d'obstacles
-        int currentScore = robot.getScore();
-        double reward = currentScore - previousScore;
-
-        // Vérifier tous les rayons pour détecter les obstacles proches
-        double penaliteObstacle = 0;
-        for (RayTracing.Rayon rayon : robot.getRayTracing().getRayons()) {
-            if ("Obstacle".equals(rayon.typeObjet) && rayon.distance < 30) {
-                penaliteObstacle -= 10; // Pénalité accrue pour chaque obstacle proche
-            }
+        iteration++;
+        // Optionnel : ajuster périodiquement epsilon/alpha (ici on peut les réduire
+        // doucement)
+        if (iteration % 1000 == 0) {
+            epsilon = Math.max(0.05, epsilon * 0.95);
+            alpha = Math.max(0.01, alpha * 0.995);
         }
 
-        // Ajouter la pénalité totale au reward
-        reward += penaliteObstacle;
+        // Mise à jour des rayons pour avoir les dernières observations
+        robot.getRayTracing().mettreAJour();
 
-        // Si un état précédent existe, mettre à jour la Q-value de la transition
-        // précédente
+        // Discrétiser l'état à partir de 4 directions clés ET du nombre de balles
+        // détenues
+        String state = discretiserEtat();
+
+        // Calcul du reward
+        int currentScore = robot.getScore();
+        double reward = 0.0;
+
+        // Base : différence de score
+        reward += (currentScore - previousScore);
+
+        // Récompense/pénalité basée sur les rayons
+        double rewardRayons = 0;
+        for (RayTracing.Rayon rayon : robot.getRayTracing().getRayons()) {
+            if ("Obstacle".equals(rayon.typeObjet) && rayon.distance < 30) {
+                rewardRayons -= 10; // forte pénalité si obstacle très proche
+            }
+            if ("Balle".equals(rayon.typeObjet)) {
+                if (rayon.distance < 18) {
+                    rewardRayons += 10; // très proche d'une balle
+                } else if (rayon.distance < 40) {
+                    rewardRayons += 5; // proche d'une balle
+                }
+            }
+        }
+        reward += rewardRayons;
+
+        // Récompenses spécifiques pour les actions spéciales
+        // Lors de l'action ATTRAPER, récompenser si le robot capte une balle (mais
+        // uniquement si proche)
+        if (previousAction == ACTION_ATTRAPER) {
+            if (robot.aUneBalle()) {
+                // On peut utiliser robot.balleAttrapee() pour savoir combien de balles ont été
+                // prises dans cette action
+                int balleAttrapee = robot.balleAttrapee();
+                reward += 20 * balleAttrapee;
+            } else {
+                // Pénaliser si l'action d'attraper n'a rien capté
+                reward -= 5;
+            }
+        }
+        // Pour l'action LANCER, récompenser fortement si le lancer permet de déposer
+        // une balle (augmentation de score)
+        if (previousAction == ACTION_LANCER) {
+            if (robot.aLanceBalleAvecSucces()) {
+                reward += 50;
+            } else {
+                reward -= 5;
+            }
+        }
+        // Pour l'action RELACHER, pénaliser si le robot relâche alors qu'il n'a pas de
+        // balle
+        if (previousAction == ACTION_RELACHER && !robot.aUneBalle()) {
+            reward -= 10;
+        }
+        // Bonus pour être proche du panier quand le robot transporte des balles
+        double distanceAuPanier = distance(robot.getPosition().getX(), robot.getPosition().getY(),
+                gestionnaire.getPanier().getPosition().getX() + gestionnaire.getPanier().getLargeur() / 2.0,
+                gestionnaire.getPanier().getPosition().getY() + gestionnaire.getPanier().getHauteur() / 2.0);
+        if (robot.aUneBalle() && distanceAuPanier < 100) {
+            reward += 15;
+        }
+
+        // Mise à jour de la Q-table pour la transition précédente
         if (previousState != null && previousAction != -1) {
             double[] qValuesPrev = qTable.getOrDefault(previousState, initQValues());
             double qPrev = qValuesPrev[previousAction];
             double maxQ = maxQValue(state);
-            // Mise à jour de la Q-value (formule Q-learning)
             qValuesPrev[previousAction] = qPrev + alpha * (reward + gamma * maxQ - qPrev);
             qTable.put(previousState, qValuesPrev);
         }
 
-        // Choisir la prochaine action via la stratégie ε-greedy
+        // Choisir la prochaine action selon ε-greedy
         int action = choisirAction(state);
-        // Appliquer la force correspondant à l'action choisie
-        double[] force = actions[action];
-        robot.appliquerForce(force[0], force[1]);
+        // Exécuter l'action choisie
+        if (action < 8) {
+            // Déplacement
+            double[] force = actions[action];
+            robot.appliquerForce(force[0], force[1]);
+        } else if (action == ACTION_ATTRAPER) {
+            attraperBalle();
+        } else if (action == ACTION_RELACHER) {
+            relacherBalle();
+        } else if (action == ACTION_LANCER) {
+            lancerBalle();
+        }
 
-        // Sauvegarder l'état et l'action pour la prochaine mise à jour
+        // Sauvegarde de l'état et de l'action pour la prochaine mise à jour
         previousState = state;
         previousAction = action;
         previousScore = currentScore;
     }
 
     /**
-     * Discrétise l'état à partir des distances des rayons dans 4 directions clés.
-     * Chaque distance est convertie en bin : 0 (proche), 1 (moyen), 2 (éloigné).
+     * Discrétise l'état en fonction des distances des rayons dans 4 directions clés
+     * et du nombre de balles détenues par le robot.
+     * Format :
+     * "A-<binAvant>|G-<binGauche>|AR-<binArriere>|D-<binDroite>|B-<nbBalles>"
      */
     private String discretiserEtat() {
         int binAvant = discretiserDistance(getRayPourAngle(0, robot.getRayTracing().getRayons()));
         int binGauche = discretiserDistance(getRayPourAngle(90, robot.getRayTracing().getRayons()));
         int binArriere = discretiserDistance(getRayPourAngle(180, robot.getRayTracing().getRayons()));
         int binDroite = discretiserDistance(getRayPourAngle(270, robot.getRayTracing().getRayons()));
-        // Format de l'état : "A-<binAvant>|G-<binGauche>|AR-<binArriere>|D-<binDroite>"
-        return "A-" + binAvant + "|G-" + binGauche + "|AR-" + binArriere + "|D-" + binDroite;
+        int nbBalles = robot.aUneBalle() ? robot.balleAttrapee() : 0;
+        return "A-" + binAvant + "|G-" + binGauche + "|AR-" + binArriere + "|D-" + binDroite + "|B-" + nbBalles;
     }
 
     /**
-     * Discrétise la distance d'un rayon en 3 bins.
-     * Si le rayon est null, on considère la distance maximale.
-     * 
-     * @param rayon Le rayon à discrétiser.
-     * @return 0 pour "proche" (< 100), 1 pour "moyen" (< 300), 2 pour "éloigné" (>=
-     *         300)
+     * Discrétise la distance d'un rayon en bins.
+     * La granularité peut être ajustée.
      */
     private int discretiserDistance(RayTracing.Rayon rayon) {
         double distance = (rayon != null) ? rayon.distance : 1000;
-        if (distance < 100)
+        if (distance < robot.getHauteur() / 2 + 5)
             return 0;
-        else if (distance < 300)
+        else if (distance < 100)
             return 1;
-        else
+        else if (distance < 300)
             return 2;
+        else
+            return 3;
     }
 
     /**
      * Retourne le rayon dont l'angle (en degrés) est le plus proche de targetAngle.
-     * 
-     * @param targetAngle L'angle cible en degrés.
-     * @param rayons      La liste des rayons du robot.
-     * @return Le rayon correspondant ou null s'il n'existe pas.
      */
     private RayTracing.Rayon getRayPourAngle(double targetAngle, java.util.List<RayTracing.Rayon> rayons) {
         RayTracing.Rayon meilleurRayon = null;
         double minDiff = Double.MAX_VALUE;
         for (RayTracing.Rayon rayon : rayons) {
             double angle = toDegrees(atan2(rayon.directionY, rayon.directionX));
-            // Normaliser l'angle entre 0 et 360
             if (angle < 0)
                 angle += 360;
             double diff = abs(angle - targetAngle);
@@ -168,10 +228,45 @@ public class IA {
     }
 
     /**
-     * Initialise un tableau de Q-values à 0 pour les 8 actions.
+     * Calcule la distance euclidienne entre deux points.
+     */
+    private double distance(double x1, double y1, double x2, double y2) {
+        double dx = x2 - x1, dy = y2 - y1;
+        return sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Action pour attraper une balle.
+     */
+    private void attraperBalle() {
+        if (robot.peutAttraperBalle()) {
+            robot.attraperBalle(gestionnaire.getBalles());
+        }
+    }
+
+    /**
+     * Action pour relâcher une balle.
+     */
+    private void relacherBalle() {
+        if (robot.aUneBalle()) {
+            robot.lacherBalle();
+        }
+    }
+
+    /**
+     * Action pour lancer une balle.
+     */
+    private void lancerBalle() {
+        if (robot.aUneBalle()) {
+            robot.lancerBalle();
+        }
+    }
+
+    /**
+     * Initialise un tableau de Q-values à 0 pour toutes les actions.
      */
     private double[] initQValues() {
-        return new double[8];
+        return new double[nbActions];
     }
 
     /**
@@ -188,25 +283,48 @@ public class IA {
     }
 
     /**
-     * Sélectionne une action selon une politique ε-greedy.
+     * Sélectionne une action selon la politique ε-greedy.
      */
     private int choisirAction(String state) {
         double[] qValues = qTable.getOrDefault(state, initQValues());
         qTable.putIfAbsent(state, qValues);
+
+        // Exploration : une probabilité epsilon d'explorer
         if (random.nextDouble() < epsilon) {
-            // Exploration : action aléatoire
-            return random.nextInt(8);
+            // Pour une exploration plus dirigée, on peut choisir aléatoirement parmi un
+            // ensemble de meilleures actions
+            return random.nextBoolean() ? argMax(qValues) : random.nextInt(nbActions);
         } else {
-            // Exploitation : choisir l'action ayant la Q-value maximale
-            int bestAction = 0;
-            double bestValue = qValues[0];
-            for (int i = 1; i < qValues.length; i++) {
-                if (qValues[i] > bestValue) {
-                    bestValue = qValues[i];
-                    bestAction = i;
-                }
+            // Exploitation : choisir l'action avec la Q-value maximale
+            return argMax(qValues);
+        }
+    }
+
+    /**
+     * Retourne l'indice de la valeur maximale dans un tableau.
+     */
+    private int argMax(double[] values) {
+        int bestAction = 0;
+        double bestValue = values[0];
+        for (int i = 1; i < values.length; i++) {
+            if (values[i] > bestValue) {
+                bestValue = values[i];
+                bestAction = i;
             }
-            return bestAction;
+        }
+        return bestAction;
+    }
+
+    // Méthodes pour ajuster epsilon, alpha et gamma (facultatives)
+    public void reduireEpsilon(double facteur) {
+        if (epsilon > 0.01) {
+            epsilon *= facteur;
+        }
+    }
+
+    public void ajusterAlpha(double facteur) {
+        if (alpha > 0.01) {
+            alpha *= facteur;
         }
     }
 
@@ -235,12 +353,11 @@ public class IA {
     }
 
     public void dessiner(GraphicsContext gc) {
-        // Dessiner les variables de l'IA sur le canvas et son choix
         gc.setFill(Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 16));
-        gc.fillText("Epsilon: " + epsilon, 250, 17);
-        gc.fillText("Alpha: " + alpha, 350, 17);
-        gc.fillText("Gamma: " + gamma, 450, 17);
+        gc.fillText("Epsilon: " + String.format("%.2f", epsilon), 250, 17);
+        gc.fillText("Alpha: " + String.format("%.2f", alpha), 350, 17);
+        gc.fillText("Gamma: " + String.format("%.2f", gamma), 450, 17);
         gc.fillText("Action: " + previousAction, 550, 17);
     }
 }

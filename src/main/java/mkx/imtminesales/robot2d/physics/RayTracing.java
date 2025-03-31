@@ -126,6 +126,11 @@ public class RayTracing {
 
             // Dessiner le rayon
             gc.strokeLine(rayon.origineX, rayon.origineY, finX, finY);
+
+            // Ecrire la distance du rayon à l'extrémité du rayon
+            gc.setFill(Color.BLACK);
+            gc.setFont(javafx.scene.text.Font.font(12));
+            gc.fillText(String.format("%d", (int) rayon.distance), finX, finY);
         }
     }
 
@@ -218,6 +223,10 @@ public class RayTracing {
      * Calcule l'intersection entre un rayon et une balle.
      */
     private static double calculerIntersectionRayonBalle(double origineX, double origineY, double dirX, double dirY, Balle balle) {
+        if (balle.estAttrapee()) {
+            return -1; // La balle est déjà attrapée, pas d'intersection
+        }
+
         // Ajuster la direction pour corriger l'angle
         double adjustedDirX = -dirX; // Rotation de π
         double adjustedDirY = -dirY;
